@@ -90,8 +90,9 @@
 
     <div class="chat-messages" id="chatBox">
         <div th:each="msg : ${messages}"
-             th:class="'message ' + (${msg.sender} == ${role} ? 'user' : 'company')"
-             th:text="${msg.text}">
+             th:class="'message ' + (${msg.sender} == ${role} ? 'user' : 'company')">
+            <span th:text="${msg.text}"></span>
+            <div class="timestamp" th:text="${msg.timestamp}"></div>
         </div>
     </div>
 
@@ -133,11 +134,18 @@
     }
 
     function showMessage(message) {
+        const myRole = "[[${role}]]"; // Thymeleaf pass
+        const bubbleRole = (message.sender === myRole) ? "user" : "company";
+
         const messageBox = document.createElement("div");
-        messageBox.className = "message " + message.sender;
-        messageBox.innerHTML = message.content;
+        messageBox.className = "message " + bubbleRole;
+        messageBox.innerHTML = `
+        ${message.content}
+        <div class="timestamp">Sekarang</div>
+    `;
 
         document.getElementById("chatBox").appendChild(messageBox);
+        document.getElementById("chatBox").scrollTop = document.getElementById("chatBox").scrollHeight;
     }
 
     connect();
