@@ -91,7 +91,7 @@
     <div class="chat-messages" id="chatBox">
         <div th:each="msg : ${messages}"
              th:class="'message ' + (${msg.sender} == ${role} ? 'user' : 'company')">
-            <span th:text="${msg.text}"></span>
+            <span th:text="${msg.content}"></span>
             <div class="timestamp" th:text="${msg.timestamp}"></div>
         </div>
     </div>
@@ -102,7 +102,10 @@
     </div>
 </div>
 
-<script>
+<script th:inline="javascript">
+    const myRole = [[${role}]];
+    const conversationId = [[${conversationId}]];
+
     var stompClient = null;
 
     function connect() {
@@ -112,7 +115,8 @@
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
 
-            stompClient.subscribe('/topic/public', function (messageOutput) {
+            const topic = "/topic/conversation." + conversationId;
+            stompClient.subscribe(topic, function (messageOutput) {
                 var message = JSON.parse(messageOutput.body);
                 showMessage(message);
             });
@@ -125,30 +129,40 @@
         if (text === "") return;
 
         stompClient.send("/app/chat.sendMessage", {}, JSON.stringify({
-            sender: "[[${role}]]", // pass role dari thymeleaf
+            sender: myRole,
             content: text,
-            conversationId: [[${conversationId}]]
+            conversationId: conversationId
         }));
 
         input.value = "";
     }
 
     function showMessage(message) {
-        const myRole = "[[${role}]]"; // Thymeleaf pass
         const bubbleRole = (message.sender === myRole) ? "user" : "company";
 
         const messageBox = document.createElement("div");
         messageBox.className = "message " + bubbleRole;
         messageBox.innerHTML = `
-        ${message.content}
-        <div class="timestamp">Sekarang</div>
-    `;
+            ${message.content}
+            <div class="timestamp">Sekarang</div>
+        `;
 
-        document.getElementById("chatBox").appendChild(messageBox);
-        document.getElementById("chatBox").scrollTop = document.getElementById("chatBox").scrollHeight;
+        const chatBox = document.getElementById("chatBox");
+        chatBox.appendChild(messageBox);
+        scrollToBottom();
+    }
+
+    function scrollToBottom() {
+        const chatBox = document.getElementById("chatBox");
+        chatBox.scrollTop = chatBox.scrollHeight;
     }
 
     connect();
+
+    window.onload = function() {
+        scrollToBottom();
+    };
+
 </script>
 
 </body>
