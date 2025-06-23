@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class JwtService {
 
-    private final String SECRET_KEY = "secret";
+    private final String SECRET_KEY = "MySuperSecretKey1234567890";
 
     private final Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
 
@@ -26,6 +26,12 @@ public class JwtService {
     public Long extractCompanyId(String token) {
         DecodedJWT decodedJWT = JWT.require(algorithm).build().verify(token);
         return decodedJWT.getClaim("companyId").asLong();
+    }
+
+    public String extractRole(String token) {
+        JWTVerifier verifier = JWT.require(algorithm).build();
+        DecodedJWT decodedJWT = verifier.verify(token);
+        return decodedJWT.getClaim("role").asString();
     }
 }
 
