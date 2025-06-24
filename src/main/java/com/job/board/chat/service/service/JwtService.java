@@ -23,15 +23,16 @@ public class JwtService {
         }
     }
 
-    public Long extractCompanyId(String token) {
-        DecodedJWT decodedJWT = JWT.require(algorithm).build().verify(token);
-        return decodedJWT.getClaim("companyId").asLong();
+    public Long extractConversationId(String token) {
+        return JWT.decode(token).getClaim("conversationId").asLong();
     }
 
     public String extractRole(String token) {
-        JWTVerifier verifier = JWT.require(algorithm).build();
-        DecodedJWT decodedJWT = verifier.verify(token);
-        return decodedJWT.getClaim("role").asString();
+        return JWT.decode(token).getClaim("role").asString();
+    }
+
+    public String extractChatWith(String token) {
+        return JWT.decode(token).getClaim("chatWith").asString();
     }
 }
 

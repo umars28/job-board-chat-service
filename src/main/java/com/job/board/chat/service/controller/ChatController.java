@@ -22,7 +22,6 @@ public class ChatController {
 
     @GetMapping("/chat")
     public String chatPage(
-            @RequestParam("conversationId") Long conversationId,
             @RequestParam("token") String token,
             Model model
     ) {
@@ -31,13 +30,16 @@ public class ChatController {
         }
 
         String role = jwtService.extractRole(token);
+        Long conversationId = jwtService.extractConversationId(token);
+        String chatWith = jwtService.extractChatWith(token);
+
         List<Message> messages = messageRepository.findByConversationIdOrderByTimestampAsc(conversationId);
 
         model.addAttribute("conversationId", conversationId);
         model.addAttribute("role", role);
+        model.addAttribute("chatWith", chatWith);
         model.addAttribute("messages", messages);
 
         return "/chat/index";
     }
-
 }
